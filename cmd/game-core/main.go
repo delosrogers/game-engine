@@ -7,24 +7,45 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"log"
+	"net/url"
+
+	//"sync"
 	"time"
 )
 
-var chanMap = make(openGames)
+//var wg sync.WaitGroup
 
 func main() {
 	flag.Parse()
 	hub := newHub()
 
-	go hub.run()
 	fmt.Println("hello world")
 	router := gin.Default()
-	router.GET("/", serveHome)
+	router.GET("/", func(c *gin.Context) {
+		roomId, err := hub.createRoom(50)
+		if err != nil {
+			log.Fatal("err creating room: ", err)
+		}
+		c.Redirect(307, url.PathEscape(roomId.String()))
+	})
+	router.GET("/:id", serveHome)
 	//router.GET("/game/:id"), handleGame)
-	router.GET("/ws", func(c *gin.Context) {
-		serveWs(hub, c.Writer, c.Request)
+	router.GET("/:id/ws", func(c *gin.Context) {
+		roomIdString, err := url.PathUnescape(c.Param("id"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		roomId, err := uuid.Parse(roomIdString)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		hub.addClientToRoom(roomId, c)
 	})
 	router.Run()
+	//wg.Wait()
+	fmt.Println("waiting for all threads to finish")
 }
 func serveHome(c *gin.Context) {
 	c.Data(200, "text/html", []byte(homeHTML))
@@ -96,7 +117,7 @@ const homeHTML string = `
             };
 
             if (window["WebSocket"]) {
-                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn = new WebSocket("ws://" + document.location.href.replace( "http://","") + "/ws");
                 conn.onclose = function (evt) {
                     var item = document.createElement("div");
                     item.innerHTML = "<b>Connection closed.</b>";

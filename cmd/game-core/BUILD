@@ -12,6 +12,7 @@ go_library(
         "client.go",
         "hub.go",
         "main.go",
+        "room.go",
     ],
     importpath = "github.com/delosrogers/game-engine/cmd/game-core",
     visibility = ["//visibility:private"],

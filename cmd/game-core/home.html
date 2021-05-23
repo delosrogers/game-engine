@@ -1,70 +1,3 @@
-// This Source Code Form is subject to the terms of the MIT License
-// See LICENSE for details
-package main
-
-import (
-	"flag"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"time"
-)
-
-var chanMap = make(openGames)
-
-func main() {
-	flag.Parse()
-	hub := newHub()
-
-	go hub.run()
-	fmt.Println("hello world")
-	router := gin.Default()
-	router.GET("/", serveHome)
-	//router.GET("/game/:id"), handleGame)
-	router.GET("/ws", func(c *gin.Context) {
-		serveWs(hub, c.Writer, c.Request)
-	})
-	router.Run()
-}
-func serveHome(c *gin.Context) {
-	c.Data(200, "text/html", []byte(homeHTML))
-}
-//func handleGame(c *gin.Context) {
-//
-//
-//	stringGameId := c.Param("id")
-//	gameID, err := uuid.UUID.Parse(stringGameId)
-//	if err != nil {
-//		return nil, err
-//	}
-//	gameChan := chanMap[gameID]
-//	go listenOnChan(gameChan)
-//
-//
-//}
-
-type openGames map[uuid.UUID]chan gameData
-
-type gameData struct {
-	user string
-	time time.Time
-	dataPayload string
-}
-
-//func createNewGame() {
-//
-//}
-
-type Player struct {
-	id uuid.UUID
-	name string
-}
-
-//func (p Player) Create(name){
-//	id =
-//}
-
-const homeHTML string = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -163,4 +96,3 @@ const homeHTML string = `
 </form>
 </body>
 </html>
-`

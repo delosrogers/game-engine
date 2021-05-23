@@ -8,8 +8,16 @@ go_binary(
 
 go_library(
     name = "game-core_lib",
-    srcs = ["main.go"],
+    srcs = [
+        "client.go",
+        "hub.go",
+        "main.go",
+    ],
     importpath = "github.com/delosrogers/game-engine/cmd/game-core",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_gin_gonic_gin//:gin"],
+    deps = [
+        "@com_github_gin_gonic_gin//:gin",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_gorilla_websocket//:websocket",
+    ],
 )

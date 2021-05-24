@@ -1,91 +1,3 @@
-// This Source Code Form is subject to the terms of the MIT License
-// See LICENSE for details
-package main
-
-import (
-	"flag"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
-	"log"
-	"net/url"
-
-	//"sync"
-	"time"
-)
-
-//var wg sync.WaitGroup
-
-func main() {
-	flag.Parse()
-	hub := newHub()
-
-	fmt.Println("hello world")
-	router := gin.Default()
-	router.GET("/", func(c *gin.Context) {
-		roomId, err := hub.createRoom(50)
-		if err != nil {
-			log.Fatal("err creating room: ", err)
-		}
-		c.Redirect(307, url.PathEscape(roomId.String()))
-	})
-	router.GET("/:id", serveHome)
-	//router.GET("/game/:id"), handleGame)
-	router.GET("/:id/ws", func(c *gin.Context) {
-		roomIdString, err := url.PathUnescape(c.Param("id"))
-		if err != nil {
-			log.Fatal(err)
-		}
-		roomId, err := uuid.Parse(roomIdString)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		hub.addClientToRoom(roomId, c)
-	})
-	router.Run()
-	//wg.Wait()
-	fmt.Println("waiting for all threads to finish")
-}
-func serveHome(c *gin.Context) {
-	c.Data(200, "text/html", []byte(homeHTML))
-}
-//func handleGame(c *gin.Context) {
-//
-//
-//	stringGameId := c.Param("id")
-//	gameID, err := uuid.UUID.Parse(stringGameId)
-//	if err != nil {
-//		return nil, err
-//	}
-//	gameChan := chanMap[gameID]
-//	go listenOnChan(gameChan)
-//
-//
-//}
-
-type openGames map[uuid.UUID]chan gameData
-
-type gameData struct {
-	user string
-	time time.Time
-	dataPayload string
-}
-
-//func createNewGame() {
-//
-//}
-
-type Player struct {
-	id uuid.UUID
-	name string
-}
-
-//func (p Player) Create(name){
-//	id =
-//}
-
-const homeHTML string = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,7 +29,8 @@ const homeHTML string = `
             };
 
             if (window["WebSocket"]) {
-                conn = new WebSocket("ws://" + document.location.href.replace( "http://","") + "/ws");
+                conn = new WebSocket("ws://" + document.location.host + "/ws");
+                conn.send
                 conn.onclose = function (evt) {
                     var item = document.createElement("div");
                     item.innerHTML = "<b>Connection closed.</b>";
@@ -184,4 +97,3 @@ const homeHTML string = `
 </form>
 </body>
 </html>
-`

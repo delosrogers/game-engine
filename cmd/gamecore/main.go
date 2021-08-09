@@ -5,12 +5,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/delosrogers/game-engine/internal/core"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"log"
 	"net/url"
-
-	//"sync"
+	"os"
 	"time"
 )
 
@@ -18,12 +18,12 @@ import (
 
 func main() {
 	flag.Parse()
-	hub := newHub()
+	hub := core.NewHub()
 
 	fmt.Println("hello world")
 	router := gin.Default()
 	router.GET("/", func(c *gin.Context) {
-		roomId, err := hub.createRoom(50)
+		roomId, err := hub.CreateRoom(50)
 		if err != nil {
 			log.Fatal("err creating room: ", err)
 		}
@@ -41,14 +41,24 @@ func main() {
 			log.Fatal(err)
 		}
 
-		hub.addClientToRoom(roomId, c)
+		hub.AddClientToRoom(roomId, c)
+	})
+	router.GET("/xssi", func(c *gin.Context) {
+		c.Data(200, "application/json", []byte(")]}'\n{\"hello\":1}"))
+	})
+	router.GET("/badxssi", func(c *gin.Context) {
+		c.Writer.Write([]byte("sdgfsg{\"hello\":1}"))
 	})
 	router.Run()
 	//wg.Wait()
 	fmt.Println("waiting for all threads to finish")
 }
 func serveHome(c *gin.Context) {
-	c.Data(200, "text/html", []byte(homeHTML))
+	f, _ := os.Open("./home.html")
+	f.Close()
+	fmt.Println(os.Getwd())
+	fmt.Println(os.Stat("../../../../../../../cmd/gamecore/home.html"))
+	c.File("../../../../../../../cmd/gamecore/home.html")
 }
 //func handleGame(c *gin.Context) {
 //

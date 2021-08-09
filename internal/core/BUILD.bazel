@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "core",
+    srcs = [
+        "client.go",
+        "hub.go",
+        "room.go",
+    ],
+    importpath = "github.com/delosrogers/game-engine/internal/core",
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "@com_github_gin_gonic_gin//:gin",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_gorilla_websocket//:websocket",
+    ],
+)

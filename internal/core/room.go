@@ -1,7 +1,9 @@
 // Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 
-package main
+package core
+
+import "github.com/delosrogers/game-engine/pkg/gamework"
 
 // Room maintains the set of active clients and broadcasts messages to the
 // clients.
@@ -19,21 +21,19 @@ type Room struct {
 	unregister chan *Client
 
 	maxClients int
+
+	// game that this room is running
+	game *gamework.Game
 }
 // newRoom create a new room with a max capacity, defaults to 2
-func newRoom(args ...int) *Room {
+func newRoom(game *gamework.Game) *Room {
 	var maxClients int
-	if len(args) > 0 {
-		maxClients = args[0]
-	} else {
-		maxClients = 2
-	}
 	return &Room{
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
-		maxClients: maxClients,
+		game: game,
 	}
 }
 
